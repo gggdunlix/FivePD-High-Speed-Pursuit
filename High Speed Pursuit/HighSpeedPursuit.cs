@@ -9,7 +9,7 @@ using FivePD.API.Utils;
 
 namespace High_Speed_Pursuit
 {
-    [CalloutProperties("High Speed Pursuit", "GGGDunlix", "0.1.2")]
+    [CalloutProperties("High Speed Pursuit", "GGGDunlix", "0.2.0")]
     public class HighSpeedPursuit : Callout
     {
         Ped suspect;
@@ -20,15 +20,22 @@ namespace High_Speed_Pursuit
             Random random = new Random();
             InitInfo(World.GetNextPositionOnStreet(Game.PlayerPed.GetOffsetPosition(Vector3Extension.Around(Game.PlayerPed.Position, 200f))));
             ShortName = "High Speed Pursuit";
-            CalloutDescription = "The suspect was spotted by traffic cameras after eluding police. Re-engage in the pursuit. Respond in Code 2.";
-            ResponseCode = 2;
-            StartDistance = 60f;
+            CalloutDescription = "The suspect was spotted by traffic cameras after eluding police. Re-engage in the pursuit. Respond in Code 3.";
+            ResponseCode = 3;
+            StartDistance = 80f;
         }
 
         public async override Task OnAccept()
         {
             InitBlip();
             UpdateData();
+            
+        }
+
+        public async override void OnStart(Ped player)
+        {
+            base.OnStart(player);
+
             var carlist = new[]
             {
                 VehicleHash.Adder,
@@ -44,18 +51,15 @@ namespace High_Speed_Pursuit
             suspect = await SpawnPed(RandomUtils.GetRandomPed(), Location);
             suspect.AlwaysKeepTask = true;
             suspect.BlockPermanentEvents = true;
-        }
 
-        public override void OnStart(Ped player)
-        {
-            base.OnStart(player);
+
             suspect.AttachBlip();
             Utilities.ExcludeVehicleFromTrafficStop(car.NetworkId, true);
             suspect.SetIntoVehicle(car, VehicleSeat.Driver);
             Pursuit.RegisterPursuit(suspect);
             suspect.Task.FleeFrom(Game.PlayerPed);
-            Utilities.RequestBackup(Utilities.Backups.Code99);
-            ShowNetworkedNotification("Pursuit engaged. Code 99 Backup requested.", "CHAR_CALL911", "CHAR_CALL911", "Dispatch", "Pursuit", 15f);
+            Utilities.RequestBackup(Utilities.Backups.Code3);
+            ShowNetworkedNotification("Pursuit engaged. Code 3 Backup requested.", "CHAR_CALL911", "CHAR_CALL911", "Dispatch", "Pursuit", 15f);
             suspect.DrivingSpeed = 230;
             suspect.DrivingStyle = DrivingStyle.Rushed;
             car.MaxSpeed = 330;
